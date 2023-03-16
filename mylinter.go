@@ -8,11 +8,11 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
-const doc = "mylinter is ..."
+const doc = "mylinter is a static analysis tool that detects unnecessarily deep nested levels of control flow."
 
 // Analyzer is ...
 var Analyzer = &analysis.Analyzer{
-	Name: "mylinter",
+	Name: "GoNestLint",
 	Doc:  doc,
 	Run:  run,
 	Requires: []*analysis.Analyzer{
@@ -23,11 +23,7 @@ var Analyzer = &analysis.Analyzer{
 func run(pass *analysis.Pass) (any, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
-	nodeFilter := []ast.Node{
-		(*ast.Ident)(nil),
-	}
-
-	inspect.Preorder(nodeFilter, func(n ast.Node) {
+	inspect.Preorder(nil, func(n ast.Node) {
 		switch n := n.(type) {
 		case *ast.Ident:
 			if n.Name == "gopher" {
