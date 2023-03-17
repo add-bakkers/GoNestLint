@@ -59,8 +59,6 @@ func detectUnnecessaryNesting(ifStmt *ast.IfStmt, pass *analysis.Pass) bool {
 			if nodesEqual(lastStmtInIf, lastStmtInElse, pass.Fset) {
 				return true
 			}
-		} else if nestedIf, ok := ifStmt.Else.(*ast.IfStmt); ok {
-			return detectUnnecessaryNesting(nestedIf, pass)
 		}
 	}
 
