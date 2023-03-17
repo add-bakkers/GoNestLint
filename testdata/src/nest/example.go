@@ -6,10 +6,10 @@ func simple() {
 	var x int
 	fmt.Scan(&x)
 
-	if x == 0 {
+	if x == 0 { // want `unnecessarily nested`
 		x = 1
 		fmt.Println("Hi ", x)
 	} else {
-		fmt.Println("Hi ", x) // want `unnecessarily nested`
+		fmt.Println("Hi ", x)
 	}
 }
