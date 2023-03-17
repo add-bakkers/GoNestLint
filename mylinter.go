@@ -37,11 +37,14 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 	return nil, nil
 }
+
 func detectUnnecessaryNesting(ifStmt *ast.IfStmt, pass *analysis.Pass) bool {
+	// check if the body is empty
 	if ifStmt.Body == nil {
 		return false
 	}
 
+	// check if the body is a single statement
 	if len(ifStmt.Body.List) == 1 {
 		if _, ok := ifStmt.Body.List[0].(*ast.IfStmt); ok {
 			return true
@@ -52,10 +55,7 @@ func detectUnnecessaryNesting(ifStmt *ast.IfStmt, pass *analysis.Pass) bool {
 		if elseBlock, ok := ifStmt.Else.(*ast.BlockStmt); ok {
 			lastStmtInIf := getLastStmt(ifStmt.Body)
 			lastStmtInElse := getLastStmt(elseBlock)
-			if lastStmtInIf == nil || lastStmtInElse == nil {
-				return false
-			}
-
+			// check the if-else block has common parts
 			if nodesEqual(lastStmtInIf, lastStmtInElse, pass.Fset) {
 				return true
 			}
