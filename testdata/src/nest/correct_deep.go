@@ -4,14 +4,12 @@ import "fmt"
 
 func correct_deep() {
 	var condition1, condition2, condition3 bool
-	if !condition1 { // ok
-		return
+	var x int
+	if condition1 { // ok
+		if condition2 && condition3 { // ok
+			fmt.Println("Hi!")
+		}
+		x = 1
 	}
-	if !condition2 { // ok
-		return
-	}
-	if !condition3 { // ok
-		return
-	}
-	fmt.Println("Hi!")
+	fmt.Println("Hi ", x)
 }

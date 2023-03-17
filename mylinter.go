@@ -37,32 +37,44 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 	return nil, nil
 }
-
 func detectUnnecessaryNesting(ifStmt *ast.IfStmt, pass *analysis.Pass) bool {
-	if ifStmt.Else == nil || ifStmt.Body == nil || isIfStmt(ifStmt.Else) {
+	if ifStmt.Body == nil {
 		return false
 	}
 
-	ifBlock, ok1 := ifStmt.Body.List[len(ifStmt.Body.List)-1].(*ast.ExprStmt)
-	elseBlock, ok2 := ifStmt.Else.(*ast.BlockStmt)
-	if !ok1 || !ok2 || len(elseBlock.List) == 0 {
-		return false
+	if len(ifStmt.Body.List) == 1 {
+		if _, ok := ifStmt.Body.List[0].(*ast.IfStmt); ok {
+			return true
+		}
 	}
 
-	elseLastStmt, ok3 := elseBlock.List[len(elseBlock.List)-1].(*ast.ExprStmt)
-	if !ok3 {
-		return false
+	if ifStmt.Else != nil {
+		if elseBlock, ok := ifStmt.Else.(*ast.BlockStmt); ok {
+			lastStmtInIf := getLastStmt(ifStmt.Body)
+			lastStmtInElse := getLastStmt(elseBlock)
+			if lastStmtInIf == nil || lastStmtInElse == nil {
+				return false
+			}
+
+			if nodesEqual(lastStmtInIf, lastStmtInElse, pass.Fset) {
+				return true
+			}
+		} else if nestedIf, ok := ifStmt.Else.(*ast.IfStmt); ok {
+			return detectUnnecessaryNesting(nestedIf, pass)
+		}
 	}
 
-	return nodesCompare(ifBlock, elseLastStmt, pass.Fset)
+	return false
 }
 
-func isIfStmt(stmt ast.Stmt) bool {
-	_, ok := stmt.(*ast.IfStmt)
-	return ok
+func getLastStmt(block *ast.BlockStmt) ast.Stmt {
+	if len(block.List) == 0 {
+		return nil
+	}
+	return block.List[len(block.List)-1]
 }
 
-func nodesCompare(a, b ast.Node, fset *token.FileSet) bool {
+func nodesEqual(a, b ast.Node, fset *token.FileSet) bool {
 	bufA := new(bytes.Buffer)
 	bufB := new(bytes.Buffer)
 
